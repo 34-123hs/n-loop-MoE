@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # bootstrap_amoe.sh — 이미 등록된 sweep에 agent를 GPU당 1개씩 띄운다 (등록은 안 함).
-#   등록(중앙에서 1회):  wandb sweep --project AMOE-SWEEP123 sweep.yaml  → ID를 .sweep_id에 저장
+#   등록(중앙에서 1회):  wandb sweep --project nLoopMoE sweep.yaml  → ID를 .sweep_id에 저장
 #   ./bootstrap_amoe.sh            # .sweep_id의 sweep에 join
 #   ./bootstrap_amoe.sh <SWEEP_ID> # 특정 sweep에 join
 set -euo pipefail
 
 AMOE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$(dirname "$AMOE_DIR")/amoe-venv"
+VENV="$AMOE_DIR/.venv"
 ENTITY="choijiwan1229-hansung-science-high-school"
-PROJECT="AMOE-SWEEP123"
+PROJECT="nLoopMoE"
 cd "$AMOE_DIR"
 
-export PATH="$VENV/bin:$PATH"          # trial이 venv python을 쓰도록
+[ -x "$VENV/bin/python" ] && export PATH="$VENV/bin:$PATH"   # 있으면 venv python 사용
 mkdir -p logs
 
 # sweep ID: 인자 > .sweep_id. (등록 기능 없음 — sweep은 여기서 중앙집중적으로 미리 등록)
@@ -24,6 +24,7 @@ else
   echo "        wandb sweep --project $PROJECT sweep.yaml   # → ID를 .sweep_id에 저장" >&2
   exit 1
 fi
+SWEEP_ID="${SWEEP_ID##*/}"             # entity/project/id 전체경로로 줘도 마지막 id만 사용
 echo "[sweep] $ENTITY/$PROJECT/$SWEEP_ID"
 
 # GPU당 agent 1개, CUDA_VISIBLE_DEVICES로 핀

@@ -14,10 +14,11 @@ main_out/
 bench-out/
 checkpoint-*/
 
-# ===== Logs / W&B =====
+# ===== Logs / W&B / sweep =====
 logs/
 wandb/
 *.log
+.sweep_id
 
 # ===== Python =====
 __pycache__/
