@@ -75,7 +75,7 @@ def run_training(args):
         logging_steps=20,
         eval_strategy="steps",
         eval_steps=args.eval_interval,
-        save_total_limit=2,
+        save_strategy="no",          # 체크포인트 저장 안 함 (로그만 남김)
         bf16=torch.cuda.is_available(),
         report_to="wandb",
         run_name=args.run_name,
