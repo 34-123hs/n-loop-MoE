@@ -10,7 +10,7 @@ val.bin
 custom-llm-out/
 hooks_outputs/
 sweep_outputs/
-main_out/
+main_out*/
 bench-out/
 checkpoint-*/
 

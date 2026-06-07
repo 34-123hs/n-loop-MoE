@@ -516,9 +516,12 @@ def run_training(args):
           f"max_steps={max_steps:,} (tokens/step={tokens_per_step:,})")
 
     # sweep(--resume=0): run마다 고유 output_dir(<run_id>) → 동시 agent 충돌 방지.
-    # 메인 학습(--resume=1): 고정 output_dir 유지 → 박스가 죽었다 켜져도 마지막 체크포인트에서 재개.
-    if wandb.run is not None and not args.resume:
-        args.output_dir = os.path.join(args.output_dir, wandb.run.id)
+    # 메인 학습(--resume=1): main_out_ponder_<n> 로 고정 → n별 분리 + 박스 재시작 시 재개.
+    if not args.resume:
+        if wandb.run is not None:
+            args.output_dir = os.path.join(args.output_dir, wandb.run.id)
+    else:
+        args.output_dir = f"{args.output_dir}_ponder_{args.ponder_steps}"
 
     targs = TrainingArguments(
         output_dir=args.output_dir,
@@ -533,7 +536,9 @@ def run_training(args):
         logging_steps=20,
         eval_strategy="steps",
         eval_steps=args.eval_interval,
-        save_strategy="no",          # 체크포인트 저장 안 함 (로그만 남김)
+        save_strategy=("steps" if args.resume else "no"),  # 풀런(resume=1)만 저장, sweep은 저장 안 함
+        save_steps=args.save_steps,
+        save_total_limit=2,                                 # 마지막 2개만 유지
         bf16=torch.cuda.is_available(),
         report_to="wandb",
         run_name=args.run_name,
